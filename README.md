@@ -1,10 +1,14 @@
-# Energy Market Analysis
+# Energy Market Analysis Tool
 
 ## Project Goal
 
-Develop a project roadmap and action items with a Python file for GitHub that can be integrated into a Tableau dashboard around the following scope:
+Develop a web tool for energy mix analysis. 
 
-Design an energy mix for a BYOG data center with an interactive decision matrix that helps clients select their preferences and provides the best energy mix accordingly.
+Given a specific decision matrix criteria, the tool should be able to generate the following:
+- scope 2 carbon emissions
+- energy mix breakdown represented as a bar chart 
+
+The tool must be interactive and able to update the calculations on-the-fly as decision criteria changes.
 
 ### Decision Matrix Criteria
 
