@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Center Energy Mix Decision Tree</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #4f8ef7;
+    --accent2: #7c5af7;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --orange: #f97316;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --solar: #f59e0b;
+    --wind: #22d3ee;
+    --grid: #6366f1;
+    --gas: #f97316;
+    --battery: #a78bfa;
+    --nuclear: #10b981;
+    --hydro: #3b82f6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0f1117 0%, #1a1d27 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  header .logo {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+
+  header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+
+  header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.5s ease;
+  }
+
+  .main {
+    display: flex;
+    min-height: calc(100vh - 85px);
+  }
+
+  /* Tree sidebar */
+  .sidebar {
+    width: 260px;
+    border-right: 1px solid var(--border);
+    padding: 24px 20px;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .sidebar h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .tree-step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    align-items: flex-start;
+  }
+
+  .tree-step:hover { background: var(--surface2); }
+  .tree-step.active { background: rgba(79, 142, 247, 0.1); }
+  .tree-step.done .step-num { background: var(--green); color: #fff; }
+
+  .step-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+    transition: all 0.3s;
+    color: var(--text-muted);
+  }
+
+  .tree-step.active .step-num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .step-info { flex: 1; }
+  .step-label { font-size: 13px; font-weight: 500; }
+  .step-answer {
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .connector {
+    width: 1px;
+    height: 12px;
+    background: var(--border);
+    margin-left: 19px;
+    margin-bottom: 8px;
+  }
+
+  /* Main content */
+  .content {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    width: 100%;
+    max-width: 680px;
+    animation: fadeUp 0.4s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(79, 142, 247, 0.15);
+    color: var(--accent);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .card h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .card .subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .options {
+    display: grid;
+    gap: 12px;
+  }
+
+  .option {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .option:hover {
+    border-color: var(--accent);
+    background: rgba(79, 142, 247, 0.07);
+    transform: translateX(4px);
+  }
+
+  .option.selected {
+    border-color: var(--accent);
+    background: rgba(79, 142, 247, 0.12);
+  }
+
+  .option-icon {
+    font-size: 28px;
+    width: 48px; height: 48px;
+    background: var(--bg);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .option-text h4 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+  .option-text p  { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+  .option-badge {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .badge-green  { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+  .badge-yellow { background: rgba(234, 179, 8, 0.15);  color: var(--yellow); }
+  .badge-blue   { background: rgba(79, 142, 247, 0.15); color: var(--accent); }
+  .badge-orange { background: rgba(249, 115, 22, 0.15); color: var(--orange); }
+
+  .nav-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .btn {
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-back {
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .btn-back:hover { color: var(--text); border-color: var(--text-muted); }
+
+  .btn-next {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    min-width: 120px;
+  }
+  .btn-next:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(79,142,247,0.4); }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* Results */
+  .results { display: none; }
+  .results.active { display: block; }
+
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .result-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(34,197,94,0.15);
+    color: var(--green);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .metric {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .metric .val {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .metric .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .chart-area {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+
+  canvas#mixChart {
+    display: block;
+  }
+
+  .legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .legend-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .legend-pct  { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+
+  .legend-bar-bg {
+    flex: 2;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .legend-bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+
+  .recommendations {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .recommendations h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rec-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .rec-item {
+    display: flex;
+    gap: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
+  .rec-icon { flex-shrink: 0; color: var(--accent); }
+
+  .restart-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .restart-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .score-ring {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .content { padding: 20px; }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .chart-area { grid-template-columns: 1fr; }
+    header { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡</div>
+  <div>
+    <h1>Data Center Energy Mix Advisor</h1>
+    <p>Interactive decision tree to optimize your power strategy</p>
+  </div>
+</header>
+
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+</div>
+
+<div class="main">
+  <aside class="sidebar">
+    <h3>Decision Path</h3>
+    <div id="treeNav"></div>
+  </aside>
+
+  <div class="content">
+    <div class="card" id="questionCard">
+      <div id="questionContent"></div>
+      <div class="nav-btns">
+        <button class="btn btn-back" id="backBtn" onclick="goBack()" style="display:none">← Back</button>
+        <button class="btn btn-next" id="nextBtn" onclick="goNext()" disabled>Continue →</button>
+      </div>
+    </div>
+
+    <div class="card results" id="resultsCard"></div>
+  </div>
+</div>
+
+<script>
+const STEPS = [
+  {
+    id: 'goal',
+    label: 'Primary Goal',
+    question: 'What is your primary energy strategy goal?',
+    subtitle: 'This shapes the entire recommendation — choose the outcome that matters most to your organization.',
+    options: [
+      { id: 'cost',     icon: '💰', label: 'Minimize Cost',        desc: 'Lowest LCOE, grid parity focus, short payback periods',    badge: 'CapEx focused',   badgeClass: 'badge-yellow' },
+      { id: 'carbon',   icon: '🌿', label: 'Carbon Neutrality',     desc: '100% renewable target, net-zero commitments, RE100 member', badge: 'ESG priority',    badgeClass: 'badge-green'  },
+      { id: 'reliable', icon: '🔒', label: 'Maximum Reliability',   desc: 'Tier IV uptime, N+2 redundancy, critical infrastructure',  badge: '99.999% uptime',  badgeClass: 'badge-blue'   },
+      { id: 'balanced', icon: '⚖️', label: 'Balanced Approach',     desc: 'Optimize across cost, carbon, and reliability equally',    badge: 'Recommended',     badgeClass: 'badge-blue'   },
+    ]
+  },
+  {
+    id: 'region',
+    label: 'Region & Climate',
+    question: 'Where is your data center located?',
+    subtitle: 'Geography determines which renewable resources are abundant and economically viable.',
+    options: [
+      { id: 'sunbelt',  icon: '☀️', label: 'Sun Belt',              desc: 'US South/Southwest, Middle East, Australia, South Asia',   badge: 'Solar-rich',      badgeClass: 'badge-yellow' },
+      { id: 'windy',    icon: '💨', label: 'Windy Region',           desc: 'Midwest US, Northern Europe, UK, Patagonia',               badge: 'Wind-rich',       badgeClass: 'badge-blue'   },
+      { id: 'hydro',    icon: '💧', label: 'Hydro Region',           desc: 'Pacific Northwest, Scandinavia, Canada, Brazil',           badge: 'Hydro-rich',      badgeClass: 'badge-blue'   },
+      { id: 'urban',    icon: '🏙️', label: 'Dense Urban / Other',    desc: 'Limited land, constrained grid, mixed climate',            badge: 'Grid-dependent',  badgeClass: 'badge-orange' },
+    ]
+  },
+  {
+    id: 'scale',
+    label: 'Power Demand',
+    question: 'What is your peak power demand?',
+    subtitle: 'Scale affects which energy sources are technically and economically feasible to deploy.',
+    options: [
+      { id: 'small',       icon: '🔋', label: 'Small  (<1 MW)',         desc: 'Edge sites, colocation, small enterprise deployments',     badge: 'Edge / Colo',     badgeClass: 'badge-blue'   },
+      { id: 'medium',      icon: '⚡', label: 'Medium  (1–10 MW)',       desc: 'Enterprise campus, regional cloud node',                   badge: 'Enterprise',      badgeClass: 'badge-blue'   },
+      { id: 'large',       icon: '🏭', label: 'Large  (10–100 MW)',      desc: 'Major cloud AZ, large hyperscaler facility',              badge: 'Hyperscaler',     badgeClass: 'badge-yellow' },
+      { id: 'hyperscale',  icon: '🌐', label: 'Hyperscale  (>100 MW)',   desc: 'Mega-campus, major cloud region, AI training cluster',    badge: 'Gigawatt scale',  badgeClass: 'badge-orange' },
+    ]
+  },
+  {
+    id: 'land',
+    label: 'Land Availability',
+    question: 'Do you have on-site or nearby land for renewable assets?',
+    subtitle: 'On-site generation reduces transmission losses and hedges against grid price volatility.',
+    options: [
+      { id: 'large_land',   icon: '🌾', label: 'Yes — substantial land',  desc: '>50 acres available within 10 miles of the site',         badge: 'Ideal for solar', badgeClass: 'badge-green'  },
+      { id: 'small_land',   icon: '🏘️', label: 'Yes — limited land',      desc: 'Rooftop or small plot, <10 acres',                        badge: 'Partial on-site', badgeClass: 'badge-yellow' },
+      { id: 'no_land',      icon: '🚫', label: 'No on-site land',          desc: 'Urban core, fully built-out campus, constrained site',    badge: 'PPA / grid only', badgeClass: 'badge-orange' },
+    ]
+  },
+  {
+    id: 'storage',
+    label: 'Storage & Backup',
+    question: 'What is your approach to energy storage and backup?',
+    subtitle: 'Storage determines how well you can handle renewable intermittency and outage events.',
+    options: [
+      { id: 'full_storage',    icon: '🔆', label: 'Full battery + diesel',   desc: 'BESS for daily cycling, diesel generators for prolonged outages',  badge: 'Max resilience', badgeClass: 'badge-green'  },
+      { id: 'battery_only',    icon: '🔋', label: 'Battery only',             desc: 'BESS for 4–8 hours, targeting 100% clean backup',                  badge: 'Clean backup',   badgeClass: 'badge-blue'   },
+      { id: 'diesel_only',     icon: '⛽', label: 'Diesel generators only',   desc: 'Traditional UPS + diesel gensets, lower upfront cost',             badge: 'Legacy approach',badgeClass: 'badge-yellow' },
+      { id: 'grid_redundancy', icon: '🔌', label: 'Dual grid feeds only',     desc: 'Rely on utility redundancy, minimal on-site storage',              badge: 'Grid-dependent', badgeClass: 'badge-orange' },
+    ]
+  },
+  {
+    id: 'ppa',
+    label: 'PPA & Procurement',
+    question: 'Are you open to Power Purchase Agreements (PPAs)?',
+    subtitle: 'PPAs let you procure renewable energy at fixed rates without owning the assets.',
+    options: [
+      { id: 'ppa_yes_virt',  icon: '📄', label: 'Yes — virtual PPA (VPPA)',  desc: 'Financial contract, additionality credits, global reach',          badge: 'Most flexible',  badgeClass: 'badge-green'  },
+      { id: 'ppa_yes_phys',  icon: '🔗', label: 'Yes — physical PPA',        desc: 'Direct wire agreement with a local renewable generator',           badge: 'Local RE',       badgeClass: 'badge-blue'   },
+      { id: 'ppa_no',        icon: '🏢', label: 'No — utility tariff only',  desc: 'Standard grid tariff, green tariff if available',                  badge: 'Utility route',  badgeClass: 'badge-yellow' },
+    ]
+  },
+];
+
+const ENERGY_SOURCES = [
+  { id: 'solar',   label: 'Solar PV',        color: '#f59e0b' },
+  { id: 'wind',    label: 'Wind',            color: '#22d3ee' },
+  { id: 'hydro',   label: 'Hydro',           color: '#3b82f6' },
+  { id: 'nuclear', label: 'Nuclear',         color: '#10b981' },
+  { id: 'grid',    label: 'Grid (utility)',  color: '#6366f1' },
+  { id: 'battery', label: 'BESS storage',   color: '#a78bfa' },
+  { id: 'gas',     label: 'Gas / backup',   color: '#f97316' },
+];
+
+let currentStep = 0;
+let answers = {};
+
+function getRecommendedMix(ans) {
+  let mix = { solar: 0, wind: 0, hydro: 0, nuclear: 0, grid: 0, battery: 0, gas: 0 };
+
+  // Region base
+  if (ans.region === 'sunbelt')  { mix.solar += 35; mix.wind += 10; mix.grid += 30; }
+  if (ans.region === 'windy')    { mix.wind  += 35; mix.solar += 10; mix.grid += 30; }
+  if (ans.region === 'hydro')    { mix.hydro += 40; mix.solar += 10; mix.grid += 20; }
+  if (ans.region === 'urban')    { mix.grid  += 50; mix.solar +=  5; mix.wind += 5; }
+
+  // Goal modifiers
+  if (ans.goal === 'carbon') {
+    mix.solar  += 10; mix.wind += 10; mix.nuclear += 10;
+    mix.grid   -= 20; mix.gas  -= 10;
+  }
+  if (ans.goal === 'cost') {
+    mix.grid += 15; mix.solar += 5;
+    mix.nuclear -= 5; mix.battery -= 5;
+  }
+  if (ans.goal === 'reliable') {
+    mix.grid += 10; mix.gas += 10; mix.battery += 10;
+    mix.solar -= 5; mix.wind -= 5;
+  }
+  if (ans.goal === 'balanced') {
+    mix.solar += 5; mix.wind += 5; mix.battery += 5;
+  }
+
+  // Scale modifiers
+  if (ans.scale === 'small')      { mix.solar += 5; mix.grid += 5; }
+  if (ans.scale === 'large')      { mix.wind += 5; mix.solar += 5; mix.nuclear += 5; mix.grid -= 5; }
+  if (ans.scale === 'hyperscale') { mix.nuclear += 10; mix.wind += 5; mix.solar += 5; mix.grid -= 10; }
+
+  // Land
+  if (ans.land === 'large_land') { mix.solar += 10; mix.grid -= 5; }
+  if (ans.land === 'no_land')    { mix.solar -= 10; mix.grid += 10; }
+
+  // Storage / backup
+  if (ans.storage === 'full_storage')    { mix.battery += 10; mix.gas += 5; }
+  if (ans.storage === 'battery_only')    { mix.battery += 12; mix.gas -= 5; }
+  if (ans.storage === 'diesel_only')     { mix.gas += 10; mix.battery -= 5; }
+  if (ans.storage === 'grid_redundancy') { mix.grid += 10; }
+
+  // PPA
+  if (ans.ppa === 'ppa_yes_virt') { mix.wind += 8; mix.solar += 8; mix.grid -= 8; }
+  if (ans.ppa === 'ppa_yes_phys') { mix.solar += 5; mix.wind += 5; mix.grid -= 5; }
+
+  // Clamp negatives to 0
+  Object.keys(mix).forEach(k => { if (mix[k] < 0) mix[k] = 0; });
+
+  // Normalize to 100%
+  const total = Object.values(mix).reduce((a, b) => a + b, 0);
+  Object.keys(mix).forEach(k => { mix[k] = Math.round(mix[k] / total * 100); });
+
+  // Fix rounding drift
+  const sum = Object.values(mix).reduce((a, b) => a + b, 0);
+  if (sum !== 100) {
+    const maxKey = Object.keys(mix).reduce((a, b) => mix[a] > mix[b] ? a : b);
+    mix[maxKey] += (100 - sum);
+  }
+
+  return mix;
+}
+
+function scoreMetrics(ans, mix) {
+  let cost = 65, carbon = 50, reliability = 60;
+
+  const renewPct = (mix.solar + mix.wind + mix.hydro + mix.nuclear);
+  carbon = Math.min(98, renewPct + 10);
+
+  if (ans.goal === 'cost')    cost = 85;
+  if (ans.goal === 'carbon')  cost = 55;
+  if (ans.goal === 'reliable') reliability = 95;
+
+  if (mix.battery > 10) reliability += 10;
+  if (mix.gas > 8)      reliability += 5;
+  if (mix.grid > 30)    reliability += 8;
+
+  if (mix.solar + mix.wind > 40) cost -= 5;
+  if (mix.nuclear > 10)          cost -= 8;
+
+  cost = Math.max(30, Math.min(98, cost));
+  reliability = Math.max(50, Math.min(99, reliability));
+
+  const lcoe = mix.nuclear > 15 ? '$68–$95/MWh' :
+               mix.solar > 30   ? '$38–$60/MWh' :
+               mix.wind  > 30   ? '$35–$55/MWh' :
+               mix.hydro > 30   ? '$30–$65/MWh' :
+                                  '$55–$85/MWh';
+
+  return { cost, carbon, reliability, lcoe };
+}
+
+function getRecommendations(ans, mix) {
+  const recs = [];
+
+  if (mix.solar > 20 && ans.land === 'large_land')
+    recs.push('Deploy behind-the-meter solar PV on available land to lock in fixed-rate generation and reduce grid exposure.');
+
+  if (mix.wind > 20 && (ans.ppa === 'ppa_yes_virt' || ans.ppa === 'ppa_yes_phys'))
+    recs.push('Procure wind energy via a long-term PPA (10–15 years) to hedge against utility rate increases.');
+
+  if (mix.battery > 8)
+    recs.push('Size BESS for 2–4 hours of peak load coverage to handle renewable intermittency and demand response programs.');
+
+  if (mix.nuclear > 10)
+    recs.push('Consider long-term contracts for nuclear power or SMR (Small Modular Reactor) offtake agreements — ideal for 24/7 clean firm power.');
+
+  if (mix.gas > 5 && ans.goal === 'carbon')
+    recs.push('Offset residual gas backup emissions with high-quality carbon credits (Gold Standard or VCS) until clean alternatives scale.');
+
+  if (ans.goal === 'carbon' && mix.grid > 20)
+    recs.push('Purchase EACs (Energy Attribute Certificates) or RECs to retire against grid consumption and maintain RE100 compliance.');
+
+  if (ans.ppa === 'ppa_yes_virt')
+    recs.push('Structure VPPAs with additionality requirements — ensure new renewable capacity is being built, not just existing assets retired.');
+
+  if (ans.scale === 'hyperscale')
+    recs.push('At hyperscale, consider direct equity investment in renewable projects for enhanced economics and supply security.');
+
+  recs.push('Implement real-time energy monitoring with automated carbon accounting dashboards aligned to GHG Protocol Scope 2 reporting.');
+
+  return recs.slice(0, 5);
+}
+
+function renderTreeNav() {
+  const nav = document.getElementById('treeNav');
+  nav.innerHTML = STEPS.map((s, i) => `
+    <div class="connector" style="${i === 0 ? 'display:none' : ''}"></div>
+    <div class="tree-step ${i < currentStep ? 'done' : ''} ${i === currentStep ? 'active' : ''}" onclick="jumpTo(${i})">
+      <div class="step-num">${i < currentStep ? '✓' : i + 1}</div>
+      <div class="step-info">
+        <div class="step-label">${s.label}</div>
+        ${answers[s.id] ? `<div class="step-answer">${getOptionLabel(s.id, answers[s.id])}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function getOptionLabel(stepId, answerId) {
+  const step = STEPS.find(s => s.id === stepId);
+  const opt  = step?.options.find(o => o.id === answerId);
+  return opt?.label ?? answerId;
+}
+
+function renderQuestion() {
+  const step = STEPS[currentStep];
+  const card = document.getElementById('questionCard');
+  const results = document.getElementById('resultsCard');
+
+  card.style.display = 'block';
+  results.classList.remove('active');
+
+  document.getElementById('progressFill').style.width = `${(currentStep / STEPS.length) * 100}%`;
+
+  document.getElementById('questionContent').innerHTML = `
+    <div class="question-tag">Step ${currentStep + 1} of ${STEPS.length} · ${step.label}</div>
+    <h2>${step.question}</h2>
+    <p class="subtitle">${step.subtitle}</p>
+    <div class="options">
+      ${step.options.map(o => `
+        <div class="option ${answers[step.id] === o.id ? 'selected' : ''}" onclick="selectOption('${o.id}')">
+          <div class="option-icon">${o.icon}</div>
+          <div class="option-text">
+            <h4>${o.label}</h4>
+            <p>${o.desc}</p>
+          </div>
+          ${o.badge ? `<span class="option-badge ${o.badgeClass}">${o.badge}</span>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  document.getElementById('backBtn').style.display = currentStep > 0 ? 'block' : 'none';
+  document.getElementById('nextBtn').disabled = !answers[step.id];
+  document.getElementById('nextBtn').textContent = currentStep === STEPS.length - 1 ? 'See Results →' : 'Continue →';
+
+  renderTreeNav();
+}
+
+function selectOption(id) {
+  const step = STEPS[currentStep];
+  answers[step.id] = id;
+  document.querySelectorAll('.option').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function goNext() {
+  if (!answers[STEPS[currentStep].id]) return;
+  if (currentStep < STEPS.length - 1) {
+    currentStep++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function goBack() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderQuestion();
+  }
+}
+
+function jumpTo(i) {
+  if (i <= currentStep) {
+    currentStep = i;
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  const mix = getRecommendedMix(answers);
+  const metrics = scoreMetrics(answers, mix);
+  const recs = getRecommendations(answers, mix);
+  const goalLabel = getOptionLabel('goal', answers.goal);
+  const regionLabel = getOptionLabel('region', answers.region);
+
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('questionCard').style.display = 'none';
+
+  const resultsCard = document.getElementById('resultsCard');
+  resultsCard.classList.add('active');
+
+  const activeSources = ENERGY_SOURCES.filter(s => mix[s.id] > 0).sort((a, b) => mix[b.id] - mix[a.id]);
+
+  resultsCard.innerHTML = `
+    <div class="result-header">
+      <div>
+        <div class="result-tag">✓ Recommendation Ready</div>
+        <h2 style="font-size:22px;margin-bottom:6px;">Your Optimal Energy Mix</h2>
+        <p style="font-size:13px;color:var(--text-muted);">
+          Based on: <strong style="color:var(--text)">${goalLabel}</strong> strategy ·
+          <strong style="color:var(--text)">${regionLabel}</strong> ·
+          <strong style="color:var(--text)">${getOptionLabel('scale', answers.scale)}</strong>
+        </p>
+      </div>
+      <button class="restart-btn" onclick="restart()">↺ Start Over</button>
+    </div>
+
+    <div class="metrics">
+      <div class="metric">
+        <div class="val" style="color:var(--solar)">${metrics.carbon}%</div>
+        <div class="lbl">Clean Energy</div>
+      </div>
+      <div class="metric">
+        <div class="val" style="color:var(--green)">${metrics.lcoe}</div>
+        <div class="lbl">Est. LCOE</div>
+      </div>
+      <div class="metric">
+        <div class="val" style="color:var(--accent)">${metrics.reliability}%</div>
+        <div class="lbl">Est. Reliability</div>
+      </div>
+    </div>
+
+    <div class="chart-area">
+      <canvas id="mixChart" width="200" height="200"></canvas>
+      <div class="legend">
+        ${activeSources.map(s => `
+          <div class="legend-item">
+            <div class="legend-dot" style="background:${s.color}"></div>
+            <span class="legend-name">${s.label}</span>
+            <div class="legend-bar-bg">
+              <div class="legend-bar-fill" style="width:${mix[s.id]}%;background:${s.color}" id="bar-${s.id}"></div>
+            </div>
+            <span class="legend-pct">${mix[s.id]}%</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="recommendations">
+      <h4>⚡ Strategic Recommendations</h4>
+      <div class="rec-list">
+        ${recs.map(r => `
+          <div class="rec-item">
+            <span class="rec-icon">→</span>
+            <span>${r}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  renderTreeNav();
+  renderDonut(activeSources, mix);
+}
+
+function renderDonut(sources, mix) {
+  const canvas = document.getElementById('mixChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 100, cy = 100, outerR = 90, innerR = 55;
+  const total = sources.reduce((sum, s) => sum + mix[s.id], 0);
+  let angle = -Math.PI / 2;
+
+  ctx.clearRect(0, 0, 200, 200);
+
+  sources.forEach(s => {
+    const slice = (mix[s.id] / total) * 2 * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, outerR, angle, angle + slice);
+    ctx.closePath();
+    ctx.fillStyle = s.color;
+    ctx.fill();
+
+    // Gap
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerR, 0, 2 * Math.PI);
+    ctx.fillStyle = '#1a1d27';
+    ctx.fill();
+
+    angle += slice;
+  });
+
+  // Center text
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = 'bold 22px Segoe UI, system-ui';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const renewPct = (mix.solar||0) + (mix.wind||0) + (mix.hydro||0) + (mix.nuclear||0);
+  ctx.fillText(renewPct + '%', cx, cy - 8);
+  ctx.font = '11px Segoe UI, system-ui';
+  ctx.fillStyle = '#64748b';
+  ctx.fillText('clean', cx, cy + 12);
+}
+
+function restart() {
+  answers = {};
+  currentStep = 0;
+  document.getElementById('resultsCard').classList.remove('active');
+  document.getElementById('questionCard').style.display = 'block';
+  renderQuestion();
+}
+
+// Init
+renderQuestion();
+</script>
+</body>
+</html>
