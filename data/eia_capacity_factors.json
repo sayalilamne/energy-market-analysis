@@ -1,0 +1,10 @@
+{
+  "_source": "EIA 860/923 2023 annual capacity factors by RTO, hand-curated seed.",
+  "solar":       {"CAISO": 0.27, "ERCOT": 0.28, "SPP": 0.26, "MISO": 0.21, "PJM": 0.22, "NYISO": 0.18, "ISO-NE": 0.19},
+  "wind":        {"CAISO": 0.28, "ERCOT": 0.40, "SPP": 0.42, "MISO": 0.36, "PJM": 0.32, "NYISO": 0.30, "ISO-NE": 0.33},
+  "geothermal":  {"CAISO": 0.90, "ERCOT": 0.85, "SPP": 0.85, "MISO": 0.85, "PJM": 0.85, "NYISO": 0.85, "ISO-NE": 0.85},
+  "natural_gas": {"CAISO": 0.48, "ERCOT": 0.57, "SPP": 0.52, "MISO": 0.50, "PJM": 0.55, "NYISO": 0.50, "ISO-NE": 0.52},
+  "coal":        {"CAISO": 0.30, "ERCOT": 0.48, "SPP": 0.52, "MISO": 0.55, "PJM": 0.50, "NYISO": 0.20, "ISO-NE": 0.20},
+  "diesel":      {"CAISO": 0.05, "ERCOT": 0.05, "SPP": 0.05, "MISO": 0.05, "PJM": 0.05, "NYISO": 0.05, "ISO-NE": 0.05},
+  "bess":        {"CAISO": 0.22, "ERCOT": 0.21, "SPP": 0.18, "MISO": 0.18, "PJM": 0.19, "NYISO": 0.18, "ISO-NE": 0.18}
+}

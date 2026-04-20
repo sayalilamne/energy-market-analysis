@@ -1,0 +1,10 @@
+{
+  "_source": "NREL ATB 2024 - Moderate case, 2024 values. Seeded hand-curated subset.",
+  "solar":       {"capex_per_kw": 1200, "fixed_om": 18,  "variable_om": 0,    "fuel_cost": 0,   "lifetime": 30},
+  "wind":        {"capex_per_kw": 1400, "fixed_om": 36,  "variable_om": 0,    "fuel_cost": 0,   "lifetime": 30},
+  "geothermal":  {"capex_per_kw": 5800, "fixed_om": 135, "variable_om": 1.2,  "fuel_cost": 0,   "lifetime": 30},
+  "natural_gas": {"capex_per_kw": 1100, "fixed_om": 15,  "variable_om": 2.5,  "fuel_cost": 28,  "lifetime": 30},
+  "coal":        {"capex_per_kw": 3800, "fixed_om": 45,  "variable_om": 4.5,  "fuel_cost": 22,  "lifetime": 40},
+  "diesel":      {"capex_per_kw": 900,  "fixed_om": 20,  "variable_om": 15,   "fuel_cost": 95,  "lifetime": 20},
+  "bess":        {"capex_per_kw": 1600, "fixed_om": 30,  "variable_om": 0,    "fuel_cost": 0,   "lifetime": 15}
+}

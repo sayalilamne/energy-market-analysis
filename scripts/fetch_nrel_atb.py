@@ -33,7 +33,7 @@ TECH_MAP = {
     "Battery":       "bess",
 }
 
-OUT = Path(__file__).resolve().parents[1] / "site" / "data" / "nrel_atb_2024.json"
+OUT = Path(__file__).resolve().parents[1] / "data" / "nrel_atb_2024.json"
 META = OUT.parent / "_meta.json"
 
 

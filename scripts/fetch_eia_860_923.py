@@ -39,7 +39,7 @@ FUEL_TO_TECH = {
     "MWH": "bess",
 }
 
-OUT = Path(__file__).resolve().parents[1] / "site" / "data" / "eia_capacity_factors.json"
+OUT = Path(__file__).resolve().parents[1] / "data" / "eia_capacity_factors.json"
 META = OUT.parent / "_meta.json"
 
 GENS_URL = "https://www.eia.gov/electricity/data/eia860/archive/xls/eia8602023.zip"

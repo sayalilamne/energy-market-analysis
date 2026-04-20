@@ -1,0 +1,6 @@
+{
+  "nrel_atb_2024":         {"refreshed": "2026-04-19", "source": "atb.nrel.gov"},
+  "egrid_2022":            {"refreshed": "2026-04-19", "source": "epa.gov/egrid"},
+  "eia_capacity_factors":  {"refreshed": "2026-04-19", "source": "eia.gov/electricity/data/eia860"},
+  "rto_hourly_sample":     {"refreshed": "2026-04-19", "source": "gridstatus"}
+}

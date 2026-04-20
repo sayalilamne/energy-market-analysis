@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Energy Market Analysis — BYOG Dashboard</title>
+  <meta name="description" content="Interactive Python-powered dashboard for optimizing the energy mix of a Bring-Your-Own-Generation data center." />
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <div id="load-status">Starting…</div>
+</div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">⚡</span>
+    <span>Energy Market Analysis</span>
+  </div>
+  <div class="meta-badge" id="meta-badge">Data: loading…</div>
+</header>
+
+<main class="layout">
+
+  <!-- ────────── LEFT: INPUTS ────────── -->
+  <aside class="sidebar" id="sidebar">
+    <h1>BYOG Decision Matrix</h1>
+    <p class="lede">Configure all 11 criteria, then click <b>Generate Optimal Energy Mix</b>.</p>
+
+    <form id="decision-form">
+      <fieldset><legend>1. Primary Goal</legend>
+        <label><input type="radio" name="primary_goal" value="Cost"> Cost</label>
+        <label><input type="radio" name="primary_goal" value="Carbon"> Carbon</label>
+        <label><input type="radio" name="primary_goal" value="Reliability"> Reliability</label>
+        <label><input type="radio" name="primary_goal" value="Balanced" checked> Balanced</label>
+      </fieldset>
+
+      <fieldset><legend>2. Energy Reliability</legend>
+        <label><input type="radio" name="reliability" value="Standard (99.9%)" checked> Standard (99.9%)</label>
+        <label><input type="radio" name="reliability" value="High (99.99%)"> High (99.99%)</label>
+        <label><input type="radio" name="reliability" value="Five Nines (99.999%)"> Five Nines (99.999%)</label>
+      </fieldset>
+
+      <fieldset><legend>3. Carbon / Sustainability Goal</legend>
+        <label><input type="radio" name="carbon_goal" value="No mandate" checked> No mandate</label>
+        <label><input type="radio" name="carbon_goal" value="Annual Net-Zero"> Annual Net-Zero</label>
+        <label><input type="radio" name="carbon_goal" value="24/7 Carbon-free"> 24/7 Carbon-free</label>
+      </fieldset>
+
+      <fieldset><legend>4. Geography</legend>
+        <label><input type="radio" name="geography" value="Pacific Northwest"> Pacific Northwest</label>
+        <label><input type="radio" name="geography" value="Mid-Atlantic" checked> Mid-Atlantic</label>
+        <label><input type="radio" name="geography" value="Sun-belt SW"> Sun-belt SW</label>
+        <label><input type="radio" name="geography" value="Texas Plains"> Texas Plains</label>
+      </fieldset>
+
+      <fieldset><legend>5. Primary Workload</legend>
+        <label><input type="radio" name="primary_workload" value="AI-Training" checked> AI Training</label>
+        <label><input type="radio" name="primary_workload" value="AI-Inference"> AI Inference</label>
+        <label><input type="radio" name="primary_workload" value="Mixed-Cloud"> Mixed Cloud</label>
+        <label><input type="radio" name="primary_workload" value="Financial-HFT"> Financial / HFT</label>
+      </fieldset>
+
+      <fieldset><legend>6. Speed to Power</legend>
+        <label><input type="radio" name="speed_to_power" value="<2 years"> &lt; 2 years</label>
+        <label><input type="radio" name="speed_to_power" value="2-5 years" checked> 2–5 years</label>
+        <label><input type="radio" name="speed_to_power" value="5+ years"> 5+ years</label>
+      </fieldset>
+
+      <fieldset><legend>7. Cost Priority</legend>
+        <label><input type="radio" name="cost_priority" value="Minimize Cost"> Minimize Cost</label>
+        <label><input type="radio" name="cost_priority" value="Balanced" checked> Balanced</label>
+        <label><input type="radio" name="cost_priority" value="Performance First"> Performance First</label>
+      </fieldset>
+
+      <fieldset><legend>8. RTO / ISO</legend>
+        <select name="rto">
+          <option value="CAISO">CAISO</option>
+          <option value="ERCOT">ERCOT</option>
+          <option value="SPP">SPP</option>
+          <option value="MISO">MISO</option>
+          <option value="PJM" selected>PJM</option>
+          <option value="NYISO">NYISO</option>
+          <option value="ISO-NE">ISO-NE</option>
+        </select>
+      </fieldset>
+
+      <fieldset><legend>9. Data Center Size — <span id="size-readout">250</span> MW</legend>
+        <input type="range" name="size_mw" min="100" max="1000" step="25" value="250" id="size-slider" />
+        <div class="range-marks"><span>100</span><span>550</span><span>1000</span></div>
+      </fieldset>
+
+      <fieldset><legend>10. Type of Data Center</legend>
+        <label><input type="radio" name="type" value="Enterprise"> Enterprise</label>
+        <label><input type="radio" name="type" value="Colocation"> Colocation</label>
+        <label><input type="radio" name="type" value="Hyperscale" checked> Hyperscale</label>
+      </fieldset>
+
+      <fieldset><legend>11. PPA Willingness</legend>
+        <label><input type="radio" name="ppa" value="virtual" checked> Virtual</label>
+        <label><input type="radio" name="ppa" value="physical"> Physical</label>
+        <label><input type="radio" name="ppa" value="none"> None</label>
+      </fieldset>
+
+      <button type="submit" id="generate-btn" class="primary" disabled>Generate Optimal Energy Mix</button>
+    </form>
+  </aside>
+
+  <!-- ────────── RIGHT: OUTPUTS ────────── -->
+  <section class="results">
+    <div id="empty-state" class="empty">
+      <h2>Results will appear here</h2>
+      <p>Fill in the 11 criteria on the left and click <b>Generate Optimal Energy Mix</b>.</p>
+    </div>
+
+    <div id="results-pane" class="hidden">
+      <div class="card-row" id="summary-cards"></div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-head">
+            <h3>Energy Mix</h3>
+            <div class="toggle" id="mix-toggle">
+              <button class="active" data-mode="sankey">Sankey</button>
+              <button data-mode="donut">Donut</button>
+            </div>
+          </div>
+          <div id="mix-chart" class="chart"></div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Regional Context</h3>
+          <div id="map-chart" class="chart"></div>
+        </div>
+
+        <div class="chart-card chart-wide">
+          <h3>10-year Projection</h3>
+          <div id="projection-chart" class="chart"></div>
+        </div>
+      </div>
+
+      <div class="recommendations">
+        <h3>Strategic Recommendations</h3>
+        <ol id="rec-list"></ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="js/pyodide-runner.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

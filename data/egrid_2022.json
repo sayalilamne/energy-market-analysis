@@ -1,0 +1,11 @@
+{
+  "_source": "EPA eGRID 2022 subregion averages, mapped to RTO. lb CO2e / MWh.",
+  "_default": 855.0,
+  "CAISO":  505.0,
+  "ERCOT":  812.0,
+  "SPP":    920.0,
+  "MISO":  1040.0,
+  "PJM":    824.0,
+  "NYISO":  540.0,
+  "ISO-NE": 560.0
+}

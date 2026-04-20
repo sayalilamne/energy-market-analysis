@@ -27,7 +27,7 @@ RTOS = {
     "ISO-NE": gridstatus.ISONE,
 }
 
-OUT = Path(__file__).resolve().parents[1] / "site" / "data" / "rto_hourly_sample.json"
+OUT = Path(__file__).resolve().parents[1] / "data" / "rto_hourly_sample.json"
 META = OUT.parent / "_meta.json"
 
 

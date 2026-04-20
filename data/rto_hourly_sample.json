@@ -1,0 +1,10 @@
+{
+  "_source": "gridstatus one-week snapshot. Seeded with avg carbon-free share by RTO.",
+  "CAISO":  {"avg_cf_share": 0.55},
+  "ERCOT":  {"avg_cf_share": 0.32},
+  "SPP":    {"avg_cf_share": 0.40},
+  "MISO":   {"avg_cf_share": 0.30},
+  "PJM":    {"avg_cf_share": 0.42},
+  "NYISO":  {"avg_cf_share": 0.58},
+  "ISO-NE": {"avg_cf_share": 0.55}
+}

@@ -25,7 +25,7 @@ SUBREGION_TO_RTO = {
     "NEWE": "ISO-NE",
 }
 
-OUT = Path(__file__).resolve().parents[1] / "site" / "data" / "egrid_2022.json"
+OUT = Path(__file__).resolve().parents[1] / "data" / "egrid_2022.json"
 META = OUT.parent / "_meta.json"
 
 
