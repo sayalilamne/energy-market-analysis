@@ -1,0 +1,6 @@
+# Local development only - NOT shipped to the browser.
+# The in-browser runtime uses Pyodide and only needs the Python stdlib.
+pandas>=2.0
+requests>=2.31
+gridstatus>=0.27
+pytest>=8.0
