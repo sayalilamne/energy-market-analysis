@@ -23,13 +23,13 @@ BASE_MIXES = {
         "natural_gas": 0.50, "wind": 0.25, "solar": 0.15, "bess": 0.05, "diesel": 0.05,
     },
     "Carbon": {
-        "solar": 0.40, "wind": 0.35, "geothermal": 0.15, "bess": 0.10,
+        "solar": 0.35, "wind": 0.30, "nuclear": 0.15, "geothermal": 0.10, "bess": 0.10,
     },
     "Reliability": {
-        "natural_gas": 0.40, "solar": 0.20, "wind": 0.15, "bess": 0.15, "diesel": 0.10,
+        "nuclear": 0.30, "natural_gas": 0.25, "solar": 0.15, "wind": 0.10, "bess": 0.15, "diesel": 0.05,
     },
     "Balanced": {
-        "solar": 0.30, "wind": 0.25, "natural_gas": 0.25, "bess": 0.15, "geothermal": 0.05,
+        "solar": 0.25, "wind": 0.20, "natural_gas": 0.20, "nuclear": 0.15, "bess": 0.15, "geothermal": 0.05,
     },
 }
 

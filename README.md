@@ -102,7 +102,7 @@ Visualizations draw inspiration from [Google Charts](https://developers.google.c
 | Location & Market-based Scope 2 Carbon Emissions | Value with units |
 
 ### Visual Mix Breakdown
-Includes: Solar, Geothermal, Wind, Natural Gas, Coal, Diesel Generator, BESS — represented as a Sankey diagram, tree map, disk, or pie chart.
+Includes: Solar, Wind, Geothermal, Nuclear, Natural Gas, Coal, Diesel Generator, BESS — represented as a Sankey diagram, tree map, disk, or pie chart.
 
 ### Strategic Recommendations
 5 tailored recommendations specific to the selected configuration.

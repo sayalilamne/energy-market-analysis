@@ -4,6 +4,7 @@ const TECH_COLOR = {
   solar:       "#f4b400",
   wind:        "#1a73e8",
   geothermal:  "#db4437",
+  nuclear:     "#7c4dff",
   natural_gas: "#5f6368",
   coal:        "#202124",
   diesel:      "#9aa0a6",
@@ -11,7 +12,7 @@ const TECH_COLOR = {
 };
 
 const TECH_LABEL = {
-  solar: "Solar", wind: "Wind", geothermal: "Geothermal",
+  solar: "Solar", wind: "Wind", geothermal: "Geothermal", nuclear: "Nuclear",
   natural_gas: "Natural Gas", coal: "Coal", diesel: "Diesel", bess: "BESS",
 };
 

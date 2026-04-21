@@ -12,7 +12,7 @@ Units: pounds of CO2-equivalent per year.
 LB_PER_METRIC_TON = 2204.62
 HOURS_PER_YEAR = 8760
 
-CARBON_FREE_TECHS = {"solar", "wind", "geothermal", "bess"}
+CARBON_FREE_TECHS = {"solar", "wind", "geothermal", "nuclear", "bess"}
 
 
 def carbon_free_share(mix_pct: dict) -> float:

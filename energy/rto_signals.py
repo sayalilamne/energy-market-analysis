@@ -17,7 +17,7 @@ def cfe_score(mix_pct: dict, rto: str, hourly_data: dict) -> float:
     grid = hourly_data.get(rto, {}).get("avg_cf_share", 0.0)
     on_site = sum(
         pct for tech, pct in mix_pct.items()
-        if tech in {"solar", "wind", "geothermal"}
+        if tech in {"solar", "wind", "geothermal", "nuclear"}
     )
     combined = min(1.0, grid * 0.3 + on_site * 0.7)
     return round(combined * 100, 1)
