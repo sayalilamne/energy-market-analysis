@@ -1,6 +1,12 @@
 {
-  "nrel_atb_2024":         {"refreshed": "2026-04-19", "source": "atb.nrel.gov"},
-  "egrid_2022":            {"refreshed": "2026-04-19", "source": "epa.gov/egrid"},
-  "eia_capacity_factors":  {"refreshed": "2026-04-19", "source": "eia.gov/electricity/data/eia860"},
-  "rto_hourly_sample":     {"refreshed": "2026-04-19", "source": "gridstatus"}
+  "nrel_atb_2024":        {"refreshed": "2026-04-19", "source": "atb.nrel.gov"},
+  "egrid_2022":           {"refreshed": "2026-04-19", "source": "epa.gov/egrid"},
+  "eia_capacity_factors": {"refreshed": "2026-04-19", "source": "eia.gov/electricity/data/eia860"},
+  "rto_hourly_sample":    {"refreshed": "2026-04-19", "source": "gridstatus"},
+  "scope1_factors":       {"refreshed": "2026-04-26", "source": "EPA emission factors hub"},
+  "iea_nze_benchmark":    {"refreshed": "2026-04-26", "source": "IEA Net Zero by 2050 Roadmap (2023)"},
+  "ira_incentives":       {"refreshed": "2026-04-26", "source": "IRS — Inflation Reduction Act §45/§48"},
+  "capex_components":     {"refreshed": "2026-04-26", "source": "NREL ATB 2024 / LBNL EMP 2024"},
+  "hourly_profiles":      {"refreshed": "2026-04-26", "source": "NREL System Advisor Model typical year"},
+  "duck_curve":           {"refreshed": "2026-04-26", "source": "CAISO OASIS / ERCOT / PJM net-load shapes"}
 }

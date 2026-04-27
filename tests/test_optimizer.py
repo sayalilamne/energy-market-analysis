@@ -15,12 +15,18 @@ BASE = {
     "size_mw": 250,
     "type": "Hyperscale",
     "ppa": "virtual",
+    "grid_relationship": "Grid-tied, mixed fleet",
+    "resilience": "Non-island",
+    "duration": "n/a",
+    "pue": 1.4,
 }
 
 
 REQUIRED_KEYS = {
-    "mix_pct", "blended_lcoe_per_mwh", "total_capex_usd",
-    "carbon_free_score", "feasibility", "emissions", "recommendations", "tooltips",
+    "mix_pct", "blended_lcoe_per_mwh", "lcoe_post_ira", "lcoe_components",
+    "total_capex_usd", "capex_breakdown", "feasibility", "emissions",
+    "iea_nze", "duck_curve", "sensitivity",
+    "recommendations", "tooltips",
 }
 
 
@@ -31,6 +37,10 @@ def test_balanced_pjm_full_result_shape():
     assert res["blended_lcoe_per_mwh"] > 0
     assert res["total_capex_usd"] > 0
     assert len(res["recommendations"]) == 5
+    # New outputs:
+    assert "scope1_tons" in res["emissions"]
+    assert res["lcoe_post_ira"] <= res["blended_lcoe_per_mwh"]
+    assert len(res["sensitivity"]) == 5
 
 
 @pytest.mark.parametrize("goal", ["Cost", "Carbon", "Reliability", "Balanced"])
@@ -48,7 +58,21 @@ def test_247_cfe_removes_fossil_techs():
     assert "coal" not in res["mix_pct"]
 
 
-def test_carbon_goal_improves_cfe_score():
-    low = run_analysis({**BASE, "primary_goal": "Cost", "carbon_goal": "No mandate"})
-    high = run_analysis({**BASE, "primary_goal": "Carbon", "carbon_goal": "24/7 Carbon-free"})
-    assert high["carbon_free_score"] > low["carbon_free_score"]
+def test_pue_scales_capex_and_emissions():
+    low  = run_analysis({**BASE, "pue": 1.1})
+    high = run_analysis({**BASE, "pue": 2.5})
+    assert high["total_capex_usd"] > low["total_capex_usd"]
+    assert high["emissions"]["location_tons"] > low["emissions"]["location_tons"]
+
+
+def test_partial_island_adds_capex_premium():
+    base = run_analysis(BASE)
+    island = run_analysis({**BASE, "resilience": "Partial island", "duration": "72 hr+"})
+    assert island["total_capex_usd"] > base["total_capex_usd"]
+    assert island["premium"] > 1.0
+
+
+def test_grid_relationship_re_storage_drops_fossils():
+    res = run_analysis({**BASE, "grid_relationship": "Grid-tied, RE + storage"})
+    assert "coal" not in res["mix_pct"]
+    assert "diesel" not in res["mix_pct"]

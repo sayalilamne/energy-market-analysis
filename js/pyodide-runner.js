@@ -11,6 +11,10 @@ const PY_FILES = [
   "rto_signals.py",
   "feasibility.py",
   "recommendations.py",
+  "ira.py",
+  "resilience.py",
+  "grid.py",
+  "sensitivity.py",
   "optimizer.py",
 ];
 const DATA_FILES = [
@@ -18,6 +22,12 @@ const DATA_FILES = [
   "egrid_2022.json",
   "eia_capacity_factors.json",
   "rto_hourly_sample.json",
+  "scope1_factors.json",
+  "iea_nze_benchmark.json",
+  "ira_incentives.json",
+  "capex_components.json",
+  "hourly_profiles.json",
+  "duck_curve.json",
   "_meta.json",
 ];
 

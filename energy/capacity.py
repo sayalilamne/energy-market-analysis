@@ -9,6 +9,7 @@ DEFAULT_CF = {
     "solar": 0.25,
     "wind": 0.35,
     "geothermal": 0.90,
+    "hydro": 0.40,
     "nuclear": 0.92,
     "natural_gas": 0.55,
     "coal": 0.50,

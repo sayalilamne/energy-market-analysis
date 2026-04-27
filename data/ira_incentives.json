@@ -1,0 +1,13 @@
+{
+  "_source": "IRS Inflation Reduction Act guidance (Dec 2024), Rhodium Group analysis 2023.",
+  "_notes": "ITC = Investment Tax Credit (% of CapEx). PTC = Production Tax Credit ($/MWh).",
+  "solar":      {"itc_pct": 0.30, "ptc_per_mwh": 0,    "type": "ITC"},
+  "wind":       {"itc_pct": 0,    "ptc_per_mwh": 27.5, "type": "PTC"},
+  "hydro":      {"itc_pct": 0.30, "ptc_per_mwh": 0,    "type": "ITC"},
+  "geothermal": {"itc_pct": 0.30, "ptc_per_mwh": 0,    "type": "ITC"},
+  "nuclear":    {"itc_pct": 0,    "ptc_per_mwh": 15,   "type": "PTC"},
+  "bess":       {"itc_pct": 0.30, "ptc_per_mwh": 0,    "type": "ITC"},
+  "natural_gas":{"itc_pct": 0,    "ptc_per_mwh": 0,    "type": "none"},
+  "coal":       {"itc_pct": 0,    "ptc_per_mwh": 0,    "type": "none"},
+  "diesel":     {"itc_pct": 0,    "ptc_per_mwh": 0,    "type": "none"}
+}

@@ -1,0 +1,14 @@
+{
+  "_source": "NREL ATB 2024 disaggregated CapEx breakdown (LBNL Energy Markets & Policy 2024).",
+  "_units": "Fraction of total CapEx by component. Sums to 1.0 per technology.",
+  "_components": ["land", "equipment", "epc", "interconnection", "financing"],
+  "solar":       {"land": 0.06, "equipment": 0.55, "epc": 0.20, "interconnection": 0.12, "financing": 0.07},
+  "wind":        {"land": 0.04, "equipment": 0.62, "epc": 0.18, "interconnection": 0.10, "financing": 0.06},
+  "hydro":       {"land": 0.10, "equipment": 0.45, "epc": 0.30, "interconnection": 0.08, "financing": 0.07},
+  "geothermal":  {"land": 0.05, "equipment": 0.40, "epc": 0.40, "interconnection": 0.08, "financing": 0.07},
+  "nuclear":     {"land": 0.03, "equipment": 0.50, "epc": 0.32, "interconnection": 0.05, "financing": 0.10},
+  "natural_gas": {"land": 0.04, "equipment": 0.55, "epc": 0.25, "interconnection": 0.10, "financing": 0.06},
+  "coal":        {"land": 0.05, "equipment": 0.55, "epc": 0.25, "interconnection": 0.08, "financing": 0.07},
+  "diesel":      {"land": 0.04, "equipment": 0.70, "epc": 0.18, "interconnection": 0.04, "financing": 0.04},
+  "bess":        {"land": 0.05, "equipment": 0.65, "epc": 0.18, "interconnection": 0.07, "financing": 0.05}
+}

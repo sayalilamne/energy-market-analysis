@@ -29,7 +29,7 @@
   <!-- ────────── LEFT: INPUTS ────────── -->
   <aside class="sidebar" id="sidebar">
     <h1>BYOG Decision Matrix</h1>
-    <p class="lede">Configure all 11 criteria, then click <b>Generate Optimal Energy Mix</b>.</p>
+    <p class="lede">Configure the criteria, then click <b>Generate Optimal Energy Mix</b>.</p>
 
     <form id="decision-form">
       <fieldset><legend>1. Primary Goal</legend>
@@ -106,6 +106,28 @@
         <label><input type="radio" name="ppa" value="none"> None</label>
       </fieldset>
 
+      <fieldset><legend>12. Grid Relationship</legend>
+        <label><input type="radio" name="grid_relationship" value="Grid-tied, RE + storage"> Grid-tied, RE + storage</label>
+        <label><input type="radio" name="grid_relationship" value="Grid-tied, mixed fleet" checked> Grid-tied, mixed fleet</label>
+        <label><input type="radio" name="grid_relationship" value="Grid-tied, gas bridge"> Grid-tied, gas bridge</label>
+      </fieldset>
+
+      <fieldset><legend>13. Resilience Mode</legend>
+        <label><input type="radio" name="resilience" value="Non-island" checked> Non-island</label>
+        <label><input type="radio" name="resilience" value="Partial island"> Partial island</label>
+        <div id="duration-wrap" class="sub-radio hidden">
+          <span class="sub-label">Backup duration</span>
+          <label><input type="radio" name="duration" value="4 hr" checked> 4 hr</label>
+          <label><input type="radio" name="duration" value="24 hr"> 24 hr</label>
+          <label><input type="radio" name="duration" value="72 hr+"> 72 hr+</label>
+        </div>
+      </fieldset>
+
+      <fieldset><legend>14. PUE — <span id="pue-readout">1.40</span></legend>
+        <input type="range" name="pue" min="1.0" max="3.0" step="0.05" value="1.4" id="pue-slider" />
+        <div class="range-marks"><span>1.0</span><span>2.0</span><span>3.0</span></div>
+      </fieldset>
+
       <button type="submit" id="generate-btn" class="primary" disabled>Generate Optimal Energy Mix</button>
     </form>
   </aside>
@@ -114,32 +136,89 @@
   <section class="results">
     <div id="empty-state" class="empty">
       <h2>Results will appear here</h2>
-      <p>Fill in the 11 criteria on the left and click <b>Generate Optimal Energy Mix</b>.</p>
+      <p>Fill in the criteria on the left and click <b>Generate Optimal Energy Mix</b>.</p>
     </div>
 
     <div id="results-pane" class="hidden">
       <div class="card-row" id="summary-cards"></div>
 
+      <!-- ESSENTIALS -->
+      <h2 class="section-head">Essentials</h2>
       <div class="chart-grid">
         <div class="chart-card">
-          <div class="chart-head">
-            <h3>Energy Mix</h3>
+          <div class="chart-head"><h3>RTO Footprint</h3></div>
+          <div id="chart-map" class="chart"></div>
+          <div class="cite">EPA eGRID 2022 · ISO/RTO service-territory maps</div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><h3>Energy Mix</h3>
             <div class="toggle" id="mix-toggle">
-              <button class="active" data-mode="sankey">Sankey</button>
-              <button data-mode="donut">Donut</button>
+              <button class="active" data-mode="donut">Donut</button>
+              <button data-mode="sankey">Sankey</button>
             </div>
           </div>
-          <div id="mix-chart" class="chart"></div>
+          <div id="chart-mix" class="chart"></div>
+          <div class="cite">Mix optimizer (rules) · NREL ATB 2024</div>
         </div>
-
-        <div class="chart-card">
-          <h3>Regional Context</h3>
-          <div id="map-chart" class="chart"></div>
-        </div>
-
         <div class="chart-card chart-wide">
-          <h3>10-year Projection</h3>
-          <div id="projection-chart" class="chart"></div>
+          <h3>Scope 2 Trajectory vs IEA Net-Zero</h3>
+          <div id="chart-trajectory" class="chart"></div>
+          <div class="cite">EPA eGRID 2022 · IEA Net Zero by 2050 Roadmap (2023)</div>
+        </div>
+      </div>
+
+      <!-- ADVANCED -->
+      <h2 class="section-head">Advanced</h2>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <div class="chart-head"><h3>LCOE Waterfall</h3>
+            <div class="toggle" id="lcoe-toggle">
+              <button class="active" data-mode="pre">Pre-IRA</button>
+              <button data-mode="post">Post-IRA</button>
+            </div>
+          </div>
+          <div id="chart-waterfall" class="chart"></div>
+          <div class="cite">NREL ATB 2024 · IRS IRA §45/§48</div>
+        </div>
+        <div class="chart-card">
+          <h3>Reliability vs Cost (Pareto)</h3>
+          <div id="chart-pareto" class="chart"></div>
+          <div class="cite">NREL ATB 2024 LCOE · Uptime Institute reliability classes</div>
+        </div>
+        <div class="chart-card">
+          <h3>CapEx Build-Up</h3>
+          <div id="chart-capex" class="chart"></div>
+          <div class="cite">NREL ATB 2024 · LBNL Energy Markets &amp; Policy 2024</div>
+        </div>
+        <div class="chart-card">
+          <h3>Capacity Factor — 24×12 Heatmap</h3>
+          <div id="chart-heatmap" class="chart"></div>
+          <div class="cite">NREL System Advisor Model · EIA Form 860/923</div>
+        </div>
+        <div class="chart-card chart-wide">
+          <h3>Island Mode — CapEx Premium &amp; Storage Sizing</h3>
+          <div id="chart-island" class="chart"></div>
+          <div class="cite">NREL Storage Futures Study · LBNL microgrid case studies</div>
+        </div>
+      </div>
+
+      <!-- SIGNATURE -->
+      <h2 class="section-head">Signature</h2>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Duck Curve Overlay</h3>
+          <div id="chart-duck" class="chart"></div>
+          <div class="cite">CAISO OASIS · ERCOT/PJM net-load shapes</div>
+        </div>
+        <div class="chart-card">
+          <h3>PUE Sensitivity Tornado</h3>
+          <div id="chart-tornado" class="chart"></div>
+          <div class="cite">NREL ATB 2024 Uncertainty Ranges · in-house elasticity model</div>
+        </div>
+        <div class="chart-card chart-wide">
+          <h3>IRA Incentive Delta</h3>
+          <div id="chart-ira" class="chart"></div>
+          <div class="cite">IRS Inflation Reduction Act — §45 PTC &amp; §48 ITC</div>
         </div>
       </div>
 

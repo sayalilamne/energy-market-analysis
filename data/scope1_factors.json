@@ -1,0 +1,8 @@
+{
+  "_source": "EPA Emission Factors for GHG Inventories (Hub, 2024). Heat rates from EIA AEO 2024.",
+  "_units": "lb CO2e per MWh of generation (combustion only)",
+  "natural_gas": 819,
+  "diesel":    1630,
+  "coal":      2100,
+  "solar": 0, "wind": 0, "geothermal": 0, "hydro": 0, "nuclear": 0, "bess": 0
+}

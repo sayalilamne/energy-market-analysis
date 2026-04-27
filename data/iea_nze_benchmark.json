@@ -1,0 +1,10 @@
+{
+  "_source": "IEA Net Zero by 2050 Roadmap (2023 update), advanced economies power-sector intensity.",
+  "_units": "lb CO2e / MWh (interpolated annual benchmark for global power)",
+  "trajectory": {
+    "2026": 720, "2027": 660, "2028": 600, "2029": 540, "2030": 480,
+    "2031": 420, "2032": 365, "2033": 310, "2034": 255, "2035": 200,
+    "2036": 165, "2037": 130, "2038": 105, "2039":  80, "2040":  60,
+    "2045":  20, "2050":   5
+  }
+}
